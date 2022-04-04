@@ -1,0 +1,25 @@
+div.suggestions {
+    background-color: #EEEEEE;
+    margin-top: 1rem;
+    display: flex;
+    padding: 0.5rem;
+    flex-wrap: wrap;
+    border-radius: 3px;
+}
+
+div.suggestions > button {
+    padding: 0.5rem;
+    border-radius: 3px;
+    font-size: 2rem;
+    background-color: #ABABAB;
+    color: black;
+    cursor: pointer;
+    margin: 0.5rem;
+    font-weight: bold;
+    user-select: none;
+    border: none;
+}
+
+div.suggestions > button:hover {
+    background-color: #888888;
+}
