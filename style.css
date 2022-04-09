@@ -5,12 +5,14 @@ div.suggestions {
     padding: 0.5rem;
     flex-wrap: wrap;
     border-radius: 3px;
+    max-height: 200px;
+    overflow-y: scroll;
 }
 
 div.suggestions > button {
     padding: 0.5rem;
     border-radius: 3px;
-    font-size: 2rem;
+    font-size: 1.5rem;
     background-color: #ABABAB;
     color: black;
     cursor: pointer;
