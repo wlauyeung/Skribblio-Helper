@@ -8,3 +8,6 @@ Skribblio Helper is a chrome extension that provides potential answers automatic
 - Automatically elimiate submitted words
 - Automatically updates word list when more hints are given
 - Search function to further narrow down potential answers
+
+## Available on Chrome Web Store
+https://chrome.google.com/webstore/detail/skribblio-helper/pnfncicapicbmndoelcfebipoibdackb
