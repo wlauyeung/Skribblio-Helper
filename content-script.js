@@ -24,12 +24,10 @@ let currentSolutions = [];
  */
 function unwrapClue(node) {
   const hints = node.childNodes[2].firstChild.childNodes;
-  console.log(hints);
   let clue = '';
   for (let i = 0; i < hints.length - 1; i++) {
     clue += hints.item(i).textContent;
   }
-  console.log(clue);
   return clue;
 }
 
