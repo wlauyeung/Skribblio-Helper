@@ -12,11 +12,11 @@ div.suggestions {
 div.suggestions > button {
     padding: 0.5rem;
     border-radius: 3px;
-    font-size: 1.5rem;
+    font-size: 0.9rem;
     background-color: #ABABAB;
     color: black;
     cursor: pointer;
-    margin: 0.5rem;
+    margin: 3px;
     font-weight: bold;
     user-select: none;
     border: none;

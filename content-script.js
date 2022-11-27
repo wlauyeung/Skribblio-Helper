@@ -1,30 +1,52 @@
-const current_word = document.getElementById('currentWord');
-const chat_elem = document.getElementById('boxChat');
-const input_chat = document.getElementById('inputChat');
-const form_chat = document.getElementById('formChat');
+const currentWord = document.getElementById('game-word');
+const gameChat = document.getElementById('game-chat');
+const inputForm = gameChat.firstChild.childNodes[2];
+const inputChat = inputForm.firstChild;
 const config = { attributes: true, childList: true, subtree: true };
 
 let words = {};
 
 const callback = function (mutations_list, observer) {
-  update_solutions(find_solutions(current_word.innerHTML));
+  displaySolutions(findSolutions(unwrapClue(currentWord)));
 };
 
 const observer = new MutationObserver(callback);
 
-const sugg_container = document.createElement('div');
+const suggContainer = document.createElement('div');
 
-let current_solutions = [];
+let currentSolutions = [];
 
-function find_solutions(clue) {
-  const num_words = clue.split(' ').length;
+/**
+ * Turns a DOM node that contains the hint into a string
+ * that is interruptable by the program.
+ * @param {Node} node
+ * @returns {String} A clue interruptable by findSolutions()
+ */
+function unwrapClue(node) {
+  const hints = node.childNodes[2].firstChild.childNodes;
+  console.log(hints);
+  let clue = '';
+  for (let i = 0; i < hints.length - 1; i++) {
+    clue += hints.item(i).textContent;
+  }
+  console.log(clue);
+  return clue;
+}
+
+/**
+ * Finds a list of pontential answers by filtering out wrong guesses with a clue.
+ * @param {String} clue 
+ * @returns {String[]} A list of potential answers
+ */
+function findSolutions(clue) {
+  const numWords = clue.split(' ').length;
   const lens = clue.split(' ').map(word => word.length);
   clue = clue.replaceAll(' ', '').replaceAll('-', '').toLowerCase();
-  if (words[num_words] !== undefined && words[num_words][clue.length] !== undefined) {
-    let guesses = words[num_words][clue.length];
-    let letter_pos = 0;
+  if (words[numWords] !== undefined && words[numWords][clue.length] !== undefined) {
+    let guesses = words[numWords][clue.length];
+    let letterPos = 0;
 
-    if (num_words > 1) {
+    if (numWords > 1) {
       guesses = guesses.filter(guess => guess.lens.every((e, i) => e === lens[i]));
     }
 
@@ -32,14 +54,14 @@ function find_solutions(clue) {
       let letter = '';
       while (clue.charAt(0) === '_') {
         clue = clue.substring(1);
-        letter_pos++;
+        letterPos++;
       }
       letter = clue.charAt(0).toLowerCase();
       if (letter !== '') {
-        guesses = guesses.filter((guess) => guess.letters.charAt(letter_pos) === letter);
+        guesses = guesses.filter((guess) => guess.letters.charAt(letterPos) === letter);
       }
       clue = clue.substring(1);
-      letter_pos++;
+      letterPos++;
     }
     return guesses;
   } else {
@@ -47,26 +69,32 @@ function find_solutions(clue) {
   }
 }
 
-function update_solutions(solutions, replace = true) {
-  sugg_container.innerHTML = '';
+/**
+ * Displays the list of potential solutions under the chat bar.
+ * @param {String[]} solutions The list of potential solutions
+ * @param {Boolean} replace True if the new answers should replace
+ * all of the old ones
+ */
+function displaySolutions(solutions, replace = true) {
+  suggContainer.innerHTML = '';
   for (const word of solutions) {
     const choice = document.createElement('button');
     choice.innerHTML = word.word;
     choice.addEventListener('mousedown', (e) => {
-      input_chat.value = word.word;
-      for (let i = 0; i < current_solutions.length; i++) {
-        if (current_solutions[i].word === word.word) {
-          current_solutions.splice(i, 1);
+      inputChat.value = word.word;
+      for (let i = 0; i < currentSolutions.length; i++) {
+        if (currentSolutions[i].word === word.word) {
+          currentSolutions.splice(i, 1);
         }
       }
       choice.click();
       setTimeout(() => { choice.remove() }, 50);
     });
     choice.setAttribute('type', 'submit');
-    sugg_container.append(choice);
+    suggContainer.append(choice);
   }
   if (replace) {
-    current_solutions = solutions;
+    currentSolutions = solutions;
   }
 }
 
@@ -75,26 +103,26 @@ fetch('https://www.wlay.me/static/json/words.json')
   .then(data => words = data)
   .catch(e => console.log(e));
 
-observer.observe(current_word, config);
-sugg_container.setAttribute('class', 'suggestions');
-form_chat.append(sugg_container);
+observer.observe(currentWord, config);
+suggContainer.setAttribute('class', 'suggestions');
+inputForm.append(suggContainer);
 
-input_chat.addEventListener('input', (e) => {
-  const guess = input_chat.value;
-  const possibilities = find_solutions(current_word.innerHTML)
-  const new_possibilities = [];
+inputChat.addEventListener('input', (e) => {
+  const guess = inputChat.value;
+  const possibilities = findSolutions(unwrapClue(currentWord));
+  const newPossibilities = [];
 
   if (possibilities.length > 0) {
     for (const possibility of possibilities) {
       if (possibility.word.includes(guess)) {
-        new_possibilities.push(possibility);
+        newPossibilities.push(possibility);
       }
     }
   }
 
-  update_solutions(new_possibilities, false);
+  displaySolutions(newPossibilities, false);
 });
 
-form_chat.addEventListener('submit', () => {
-  update_solutions(current_solutions);
+gameChat.addEventListener('submit', () => {
+  displaySolutions(currentSolutions);
 });
