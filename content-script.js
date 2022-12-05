@@ -106,13 +106,13 @@ suggContainer.setAttribute('class', 'suggestions');
 inputForm.append(suggContainer);
 
 inputChat.addEventListener('input', (e) => {
-  const guess = inputChat.value;
+  const guess = inputChat.value.toLowerCase();
   const possibilities = findSolutions(unwrapClue(currentWord));
   const newPossibilities = [];
 
   if (possibilities.length > 0) {
     for (const possibility of possibilities) {
-      if (possibility.word.includes(guess)) {
+      if (possibility.word.toLowerCase().includes(guess)) {
         newPossibilities.push(possibility);
       }
     }
