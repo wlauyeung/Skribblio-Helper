@@ -89,6 +89,10 @@ function displaySolutions(solutions, replace = true) {
       setTimeout(() => { choice.remove() }, 50);
     });
     choice.setAttribute('type', 'submit');
+    choice.addEventListener('focus', (e) => {
+      const value = word.word;
+      inputChat.value = value;
+    });
     suggContainer.append(choice);
   }
   if (replace) {
@@ -119,6 +123,15 @@ inputChat.addEventListener('input', (e) => {
   }
 
   displaySolutions(newPossibilities, false);
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.ctrlKey || e.metaKey) {
+    e.preventDefault();
+    inputChat.focus();
+    inputChat.value = '';
+    displaySolutions(currentSolutions);
+  } 
 });
 
 gameChat.addEventListener('submit', () => {
