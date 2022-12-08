@@ -61,9 +61,9 @@ class Bot {
   /** @type {Element} */
   #gameChat;
   /** @type {Element} */
-  #indexMode;
-  /** @type {Element} */
   #currentWord
+  /** @type {Boolean} */
+  #indexMode;
   #currentSolutions = [];
 
   /**
@@ -77,8 +77,8 @@ class Bot {
     this.#chat = new Chat(realChatNode, fakeChatNode, submitBtn);
     this.#inputForm = inputForm;
     this.#gameChat = gameChat;
-    this.#indexMode = true;
     this.#currentWord = currentWord;
+    this.#indexMode = true; 
 
     const callback = (mutations_list, observer, b=this) => {
       b.displaySolutions(b.findSolutions(b.getCurrentWord()));
@@ -91,8 +91,15 @@ class Bot {
     .then(res => res.json())
     .then(data => this.#words = data)
     .catch(e => console.log(e));
+
+    chrome.storage.onChanged.addListener((changes, namespace) => {
+      const imKey = 'indexMode';
+      if (imKey in changes) {
+        this.changeIndexMode(changes[imKey].newValue);
+      }
+    });
   
-    observer.observe(currentWord, config);
+    observer.observe(this.#currentWord, config);
     this.#suggContainer.setAttribute('class', 'suggestions');
     this.#inputForm.append(this.#suggContainer);
     this.#inputForm.append(submitBtn);
@@ -154,6 +161,10 @@ class Bot {
     
     this.#gameChat.addEventListener('submit', () => {
       this.displaySolutions(this.#currentSolutions);
+    });
+
+    chrome.storage.sync.get(["indexMode"]).then((result) => {
+      this.changeIndexMode(result.indexMode);
     });
   }
   
@@ -264,7 +275,15 @@ class Bot {
    * @returns {String} A clue
    */
   getCurrentWord() {
-    return this.unwrapClue(currentWord);
+    return this.unwrapClue(this.#currentWord);
+  }
+
+  /**
+   * Updates the index mode according to chrome.storage.
+   * @param {Boolean} mode 
+   */
+  changeIndexMode(mode) {
+    this.#indexMode = mode;
   }
 }
 

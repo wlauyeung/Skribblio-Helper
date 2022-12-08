@@ -4,3 +4,9 @@ chrome.action.onClicked.addListener((tab) => {
     files: ['content-script.js']
   });
 });
+
+chrome.storage.sync.get('indexMode', result => {
+  if (result.indexMode === undefined) {
+    chrome.storage.sync.set({ indexMode: true });
+  }
+});

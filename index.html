@@ -1,20 +1,59 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;500&display=swap" rel="stylesheet">
     <style>
       body {
-        width: 200px;
+        font-family: 'Nunito', sans-serif;
       }
       div.main-content {
+        display: flex;
+      }
+      div.main-content > div {
+        padding: 1rem 1rem;
+      }
+      div.main-content > div:first-child {
         text-align: center;
+      }
+      div.main-content > div:first-child > img{
+        border-radius: 1000px;
+        width: 100px;
+      }
+      div.main-content > div:last-child {
+        min-width: 200px;
+      }
+      div.main-content > div:last-child > table {
+        width: 100%;
+        border-spacing: 0 1em;
+        border-collapse: collapse; 
+      }
+      div.main-content > div:last-child > h2 {
+        border-left: 5px solid #282929;
+        padding-left: 0.5rem;
       }
     </style>
   </head>
   <body>
     <div class="main-content">
-      <img src="images/icon128.png" />
-      <h1>Skribbl.io Helper</h4>
-      <h2>By Smartjacky</h2>
+      <div>
+        <img src="images/icon128.png" />
+        <h2>Skribbl.io Helper</h2>
+        <h3>By Smartjacky</h3>
+      </div>
+      <div>
+        <h2>Settings</h2>
+        <table>
+          <tr>
+            <td>
+              <label for="indexMode">Submit with Number</label>
+            </td>
+            <td>
+              <input type="checkbox" id="indexMode">
+            </td>
+          </tr>
+        </table>
+      </div>
     </div>
+    <script src="index.js"></script>
   </body>
 </html>
