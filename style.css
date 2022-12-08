@@ -9,6 +9,10 @@ div.suggestions {
   overflow-y: scroll;
 }
 
+div.suggestions > button {
+  visibility: hidden;
+}
+
 div.solution {
   padding: 0.7rem 0.5rem;
   border-radius: 3px;
@@ -25,15 +29,6 @@ div.solution {
 
 div.solution:hover {
   background-color: #888888;
-}
-
-div.solution > button {
-  visibility: hidden;
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  width: 0px;
-  height: 0px;
 }
 
 div.solution > span {
