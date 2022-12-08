@@ -89,6 +89,7 @@ function displaySolutions(solutions, replace = true) {
       setTimeout(() => { choice.remove() }, 50);
     });
     choice.setAttribute('type', 'submit');
+    choice.setAttribute('class', 'solution');
     choice.addEventListener('focus', (e) => {
       const value = word.word;
       inputChat.value = value;
@@ -131,7 +132,18 @@ document.addEventListener('keydown', (e) => {
     inputChat.focus();
     inputChat.value = '';
     displaySolutions(currentSolutions);
-  } 
+  }
+  if (e.code === 'Tab') {
+    const nodes = suggContainer.childNodes;
+    if (nodes.length === 0 || (document.activeElement !== inputChat 
+      && document.activeElement.className !== 'solution')) {
+        e.preventDefault();
+    }
+    if (nodes.length > 0 && document.activeElement === nodes[nodes.length - 1]) {
+      e.preventDefault();
+      nodes[0].focus();
+    }
+  }
 });
 
 gameChat.addEventListener('submit', () => {
