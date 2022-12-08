@@ -1,27 +1,49 @@
 div.suggestions {
-    background-color: #EEEEEE;
-    margin-top: 1rem;
-    display: flex;
-    padding: 0.5rem;
-    flex-wrap: wrap;
-    border-radius: 3px;
-    max-height: 200px;
-    overflow-y: scroll;
+  background-color: #EEEEEE;
+  margin-top: 1rem;
+  display: flex;
+  padding: 0.5rem;
+  flex-wrap: wrap;
+  border-radius: 3px;
+  max-height: 200px;
+  overflow-y: scroll;
 }
 
-div.suggestions > button {
-    padding: 0.5rem;
-    border-radius: 3px;
-    font-size: 0.9rem;
-    background-color: #ABABAB;
-    color: black;
-    cursor: pointer;
-    margin: 3px;
-    font-weight: bold;
-    user-select: none;
-    border: none;
+div.solution {
+  padding: 0.7rem 0.5rem;
+  border-radius: 3px;
+  font-size: 0.9rem;
+  background-color: #ABABAB;
+  color: black;
+  cursor: pointer;
+  margin: 3px;
+  font-weight: bold;
+  user-select: none;
+  border: none;
+  position: relative;
 }
 
-div.suggestions > button:hover {
-    background-color: #888888;
+div.solution:hover {
+  background-color: #888888;
+}
+
+div.solution > button {
+  visibility: hidden;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 0px;
+  height: 0px;
+}
+
+div.solution > span {
+  position: absolute;
+  bottom: 0px;
+  right: 0px;
+  padding: 1px 5px;
+  background-color: black;
+  color: #EEEEEE;
+  border-radius: 3px;
+  font-size: 0.4rem;
+  display:block;
 }

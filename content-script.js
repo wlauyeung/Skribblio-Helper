@@ -1,7 +1,8 @@
 const currentWord = document.getElementById('game-word');
 const gameChat = document.getElementById('game-chat');
 const inputForm = gameChat.firstChild.childNodes[2];
-const inputChat = inputForm.firstChild;
+const inputChatReal = inputForm.firstChild;
+const inputChatFake = inputChatReal.cloneNode(true);
 const config = { attributes: true, childList: true, subtree: true };
 
 let words = {};
@@ -74,31 +75,56 @@ function findSolutions(clue) {
  * all of the old ones
  */
 function displaySolutions(solutions, replace = true) {
+  let i = 0;
   suggContainer.innerHTML = '';
   for (const word of solutions) {
-    const choice = document.createElement('button');
+    const choice = document.createElement('div');
+    const btn = document.createElement('button');
+    const index = document.createElement('span');
+    const submit = () => {
+      inputChatReal.value = word.word;
+      inputChatFake.value = word.word;
+      btn.click();
+      removeSolution(choice);
+    };
+    btn.innerHTML = word.word;
+    btn.setAttribute('type', 'submit');
+    index.innerHTML = i;
     choice.innerHTML = word.word;
-    choice.addEventListener('mousedown', (e) => {
-      inputChat.value = word.word;
-      for (let i = 0; i < currentSolutions.length; i++) {
-        if (currentSolutions[i].word === word.word) {
-          currentSolutions.splice(i, 1);
-        }
-      }
-      choice.click();
-      setTimeout(() => { choice.remove() }, 50);
+    choice.addEventListener('mousedown', submit);
+    choice.addEventListener('keypress', e => {
+      if (e.code === 'Enter') submit();
     });
-    choice.setAttribute('type', 'submit');
     choice.setAttribute('class', 'solution');
+    choice.setAttribute('tabindex', '-1');
+    choice.setAttribute('word', word.word);
     choice.addEventListener('focus', (e) => {
       const value = word.word;
-      inputChat.value = value;
+      inputChatReal.value = value;
+      inputChatFake.value = word.word;
     });
+    choice.append(index);
+    choice.append(btn);
     suggContainer.append(choice);
+    i++;
   }
   if (replace) {
     currentSolutions = solutions;
   }
+}
+
+/**
+ * Remove a possible solution from the suggestion list.
+ * @param {Element} solutionNode 
+ */
+function removeSolution(solutionNode) {
+  const word = solutionNode.getAttribute('word');
+  for (let i = 0; i < currentSolutions.length; i++) {
+    if (currentSolutions[i].word === word) {
+      currentSolutions.splice(i, 1);
+    }
+  }
+  setTimeout(() => { solutionNode.remove() }, 50);
 }
 
 fetch('https://www.wlay.me/static/json/words.json')
@@ -110,10 +136,15 @@ observer.observe(currentWord, config);
 suggContainer.setAttribute('class', 'suggestions');
 inputForm.append(suggContainer);
 
-inputChat.addEventListener('input', (e) => {
-  const guess = inputChat.value.toLowerCase();
+inputChatReal.after(inputChatFake);
+inputChatReal.style.visibility = 'hidden';
+
+inputChatFake.addEventListener('input', (e) => {
+  const guess = inputChatFake.value.toLowerCase();
   const possibilities = findSolutions(unwrapClue(currentWord));
   const newPossibilities = [];
+
+  if (!isNaN(parseInt(guess))) return;
 
   if (possibilities.length > 0) {
     for (const possibility of possibilities) {
@@ -126,23 +157,37 @@ inputChat.addEventListener('input', (e) => {
   displaySolutions(newPossibilities, false);
 });
 
+inputChatFake.addEventListener('keypress', (e) => {
+  if (e.code === 'Enter') {
+    const idx = parseInt(inputChatFake.value);
+    if (!isNaN(idx) && idx >= 0 && idx <= suggContainer.childNodes.length - 1) {
+      inputChatFake.value = suggContainer.childNodes[idx].getAttribute('word');
+      removeSolution(suggContainer.childNodes[idx]);
+    }
+    inputChatReal.value = inputChatFake.value;
+    inputChatReal.click();
+  }
+});
+
 document.addEventListener('keydown', (e) => {
   if (e.ctrlKey || e.metaKey) {
     e.preventDefault();
-    inputChat.focus();
-    inputChat.value = '';
+    inputChatFake.focus();
+    inputChatFake.value = '';
+    inputChatReal.value = '';
     displaySolutions(currentSolutions);
   }
   if (e.code === 'Tab') {
-    const nodes = suggContainer.childNodes;
-    if (nodes.length === 0 || (document.activeElement !== inputChat 
-      && document.activeElement.className !== 'solution')) {
-        e.preventDefault();
+    e.preventDefault();
+    const solutions = suggContainer.childNodes;
+    let node = document.activeElement;
+    if (solutions.length === 0) return;
+    if (node.className !== 'solution' || node.nextSibling === null) {
+      node = solutions[0];
+    } else {
+      node = node.nextSibling;
     }
-    if (nodes.length > 0 && document.activeElement === nodes[nodes.length - 1]) {
-      e.preventDefault();
-      nodes[0].focus();
-    }
+    node.focus();
   }
 });
 
