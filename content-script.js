@@ -64,6 +64,8 @@ class Bot {
   #currentWord
   /** @type {Boolean} */
   #indexMode;
+  /** @type {Number} */
+  #sortingMode;
   #currentSolutions = [];
 
   /**
@@ -79,6 +81,7 @@ class Bot {
     this.#gameChat = gameChat;
     this.#currentWord = currentWord;
     this.#indexMode = true; 
+    this.#sortingMode = 0;
 
     const callback = (mutations_list, observer, b=this) => {
       b.displaySolutions(b.findSolutions(b.getCurrentWord()));
@@ -93,9 +96,15 @@ class Bot {
     .catch(e => console.log(e));
 
     chrome.storage.onChanged.addListener((changes, namespace) => {
-      const imKey = 'indexMode';
-      if (imKey in changes) {
-        this.changeIndexMode(changes[imKey].newValue);
+      for (const key of Object.keys(changes)) {
+        if (key === 'indexMode') {
+          this.changeIndexMode(changes[key].newValue);
+        } else if (key === 'sortingMode') {
+          const mode = parseInt(changes[key].newValue);
+          if (!isNaN(mode)) {
+            this.changeSortingMode(mode);
+          }
+        }
       }
     });
   
@@ -166,6 +175,12 @@ class Bot {
     chrome.storage.sync.get(["indexMode"]).then((result) => {
       this.changeIndexMode(result.indexMode);
     });
+    chrome.storage.sync.get(["sortingMode"]).then((result) => {
+      const mode = parseInt(result.sortingMode);
+      if (!isNaN(mode)) {
+        this.changeSortingMode(mode);
+      }
+    });
   }
   
   /**
@@ -213,7 +228,7 @@ class Bot {
         clue = clue.substring(1);
         letterPos++;
       }
-      return guesses;
+      return this.sortSolutions(guesses);
     } else {
       return [];
     }
@@ -284,6 +299,26 @@ class Bot {
    */
   changeIndexMode(mode) {
     this.#indexMode = mode;
+  }
+
+  /**
+   * Updates the index mode according to chrome.storage.
+   * @param {Number} mode 
+   */
+  changeSortingMode(mode) {
+    if (mode < 0) return;
+    this.#sortingMode = mode;
+  }
+
+  /**
+   * Sorts the solutions according to this.#sortingMode.
+   * @param {Object} solutions 
+   */
+  sortSolutions(solutions) {
+    if (this.#sortingMode === 0) {
+      return solutions.sort((w1, w2) => w1.word.localeCompare(w2.word));
+    }
+    return solutions;
   }
 }
 

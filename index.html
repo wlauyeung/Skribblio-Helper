@@ -20,12 +20,15 @@
         width: 100px;
       }
       div.main-content > div:last-child {
-        min-width: 200px;
+        min-width: 250px;
       }
       div.main-content > div:last-child > table {
         width: 100%;
         border-spacing: 0 1em;
         border-collapse: collapse; 
+      }
+      div.main-content > div:last-child > table td:last-child > * {
+        float: right;
       }
       div.main-content > div:last-child > h2 {
         border-left: 5px solid #282929;
@@ -49,6 +52,16 @@
             </td>
             <td>
               <input type="checkbox" id="indexMode">
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <label for="sortingMode">Sorting Method</label>
+            </td>
+            <td>
+              <select id="sortingMode">
+                <option value="0">Alphabetical</option>
+              </select>
             </td>
           </tr>
         </table>
