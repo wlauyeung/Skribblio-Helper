@@ -117,7 +117,7 @@ class Bot {
     this.#inputForm.append(submitBtn);
     
     realChatNode.after(inputChatFake);
-    realChatNode.style.visibility = 'hidden';
+    realChatNode.style.display = 'none';
     
     fakeChatNode.addEventListener('input', (e) => {
       const guess = fakeChatNode.value.toLowerCase();
