@@ -81,7 +81,7 @@ class Bot {
     this.#gameChat = gameChat;
     this.#currentWord = currentWord;
     this.#indexMode = true; 
-    this.#sortingMode = 0;
+    this.#sortingMode = 3;
 
     const callback = (mutations_list, observer, b=this) => {
       b.displaySolutions(b.findSolutions(b.getCurrentWord()));
@@ -103,9 +103,12 @@ class Bot {
           const mode = parseInt(changes[key].newValue);
           if (!isNaN(mode)) {
             this.changeSortingMode(mode);
+            this.#currentSolutions = this.sortSolutions(this.#currentSolutions);
+            console.log(this.#currentSolutions);
           }
         }
       }
+      this.displaySolutions(this.#currentSolutions);
     });
   
     observer.observe(this.#currentWord, config);
@@ -245,13 +248,11 @@ class Bot {
     this.#suggContainer.innerHTML = '';
     for (const word of solutions) {
       const choice = document.createElement('div');
-      const index = document.createElement('span');
       const submit = () => {
         this.#chat.write(word.word);
         this.removeSolution(choice);
         this.#chat.submit();
       };
-      index.innerHTML = i;
       choice.innerHTML = word.word;
       choice.addEventListener('mousedown', submit);
       choice.addEventListener('keypress', e => {
@@ -263,7 +264,11 @@ class Bot {
       choice.addEventListener('focus', (e) => {
         this.#chat.write(word.word);
       });
-      choice.append(index);
+      if (this.#indexMode) {
+        const index = document.createElement('span');
+        index.innerHTML = i;
+        choice.append(index);
+      }
       this.#suggContainer.append(choice);
       i++;
     }
@@ -315,8 +320,16 @@ class Bot {
    * @param {Object} solutions 
    */
   sortSolutions(solutions) {
-    if (this.#sortingMode === 0) {
-      return solutions.sort((w1, w2) => w1.word.localeCompare(w2.word));
+    switch(this.#sortingMode) {
+      case 0:
+        return solutions.sort((w1, w2) => w1.word.localeCompare(w2.word));
+      case 1:
+        return solutions.sort((w1, w2) => w2.picked - w1.picked);
+      case 2:
+        return solutions.sort((w1, w2) => w2.difficulty - w1.difficulty);
+      case 3:
+        return solutions.sort((w1, w2) => (w2.picked - w1.picked === 0)
+          ? w2.difficulty - w1.difficulty : w2.picked - w1.picked);
     }
     return solutions;
   }

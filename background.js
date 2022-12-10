@@ -13,6 +13,6 @@ chrome.storage.sync.get('indexMode', result => {
 
 chrome.storage.sync.get('sortingMode', result => {
   if (result.sortingMode === undefined) {
-    chrome.storage.sync.set({ sortingMode: 0 });
+    chrome.storage.sync.set({ sortingMode: 3 });
   }
 });

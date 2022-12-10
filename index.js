@@ -11,7 +11,7 @@
     console.log(result.sortingMode);
     sortingModeNode.value = result.sortingMode;
   });
-  sortingModeNode.addEventListener('click', () => {
+  sortingModeNode.addEventListener('change', () => {
     chrome.storage.sync.set({ sortingMode: sortingModeNode.value });
   });
 })();
