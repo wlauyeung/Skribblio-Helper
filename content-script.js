@@ -104,7 +104,6 @@ class Bot {
           if (!isNaN(mode)) {
             this.changeSortingMode(mode);
             this.#currentSolutions = this.sortSolutions(this.#currentSolutions);
-            console.log(this.#currentSolutions);
           }
         }
       }

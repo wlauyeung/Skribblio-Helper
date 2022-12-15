@@ -1,6 +1,8 @@
 (() => {
+  const manifestData = chrome.runtime.getManifest();
   const indexModeNode = document.getElementById('indexMode');
   const sortingModeNode = document.getElementById('sortingMode');
+  document.getElementById('version').innerHTML = `v${manifestData.version}`;
   chrome.storage.sync.get(["indexMode"]).then((result) => {
     indexModeNode.checked = result.indexMode;
   });

@@ -6,6 +6,10 @@
       body {
         font-family: 'Nunito', sans-serif;
       }
+      a, a:link {
+        color: royalblue;
+        text-decoration: none;
+      }
       div.main-content {
         display: flex;
       }
@@ -34,14 +38,18 @@
         border-left: 5px solid #282929;
         padding-left: 0.5rem;
       }
+      #title {
+        margin-bottom: 0;
+      }
     </style>
   </head>
   <body>
     <div class="main-content">
       <div>
         <img src="images/icon128.png" />
-        <h2>Skribbl.io Helper</h2>
-        <h3>By Smartjacky</h3>
+        <h2 id="title">Skribbl.io Helper</h2>
+        <span id="version"></span>
+        <h3>By <a href="https://github.com/wlauyeung" target="_blank" rel="noopener noreferrer">Smartjacky</a></h3>
       </div>
       <div>
         <h2>Settings</h2>
@@ -56,7 +64,7 @@
           </tr>
           <tr>
             <td>
-              <label for="sortingMode">Sorting Method</label>
+              <label for="sortingMode">Sorting Order</label>
             </td>
             <td>
               <select id="sortingMode">

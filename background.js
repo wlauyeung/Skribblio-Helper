@@ -7,12 +7,12 @@ chrome.action.onClicked.addListener((tab) => {
 
 chrome.storage.sync.get('indexMode', result => {
   if (result.indexMode === undefined) {
-    chrome.storage.sync.set({ indexMode: true });
+    chrome.storage.sync.set({ indexMode: false });
   }
 });
 
 chrome.storage.sync.get('sortingMode', result => {
   if (result.sortingMode === undefined) {
-    chrome.storage.sync.set({ sortingMode: 3 });
+    chrome.storage.sync.set({ sortingMode: 0 });
   }
 });
