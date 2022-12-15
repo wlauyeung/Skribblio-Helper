@@ -7,7 +7,7 @@ chrome.action.onClicked.addListener((tab) => {
 
 chrome.storage.sync.get('indexMode', result => {
   if (result.indexMode === undefined) {
-    chrome.storage.sync.set({ indexMode: false });
+    chrome.storage.sync.set({ indexMode: true });
   }
 });
 
