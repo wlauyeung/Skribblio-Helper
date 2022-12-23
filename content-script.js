@@ -208,7 +208,8 @@ class Bot {
   findSolutions(clue) {
     const numWords = clue.split(' ').length;
     const lens = clue.split(' ').map(word => word.length);
-    clue = clue.replaceAll(' ', '').toLowerCase();
+    clue = clue.replaceAll(' ', '');
+      clue.replaceAll(' ', '').toLowerCase();
     if (this.#words[numWords] !== undefined && this.#words[numWords][clue.length] !== undefined) {
       let guesses = this.#words[numWords][clue.length];
       let letterPos = 0;
@@ -223,7 +224,7 @@ class Bot {
           clue = clue.substring(1);
           letterPos++;
         }
-        letter = clue.charAt(0).toLowerCase();
+        letter = clue.charAt(0);
         if (letter !== '') {
           guesses = guesses.filter((guess) => guess.letters.charAt(letterPos) === letter);
         }
