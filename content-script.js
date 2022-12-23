@@ -208,7 +208,7 @@ class Bot {
   findSolutions(clue) {
     const numWords = clue.split(' ').length;
     const lens = clue.split(' ').map(word => word.length);
-    clue = clue.replaceAll(' ', '').replaceAll('-', '').toLowerCase();
+    clue = clue.replaceAll(' ', '').toLowerCase();
     if (this.#words[numWords] !== undefined && this.#words[numWords][clue.length] !== undefined) {
       let guesses = this.#words[numWords][clue.length];
       let letterPos = 0;
