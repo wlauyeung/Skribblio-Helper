@@ -24,7 +24,7 @@
         width: 100px;
       }
       div.main-content > div:last-child {
-        min-width: 250px;
+        min-width: 280px;
       }
       div.main-content > div:last-child > table {
         width: 100%;
@@ -38,11 +38,35 @@
         border-left: 5px solid #282929;
         padding-left: 0.5rem;
       }
+      div.cwl-container {
+        display:flex;
+      }
+      div.cwl-container button {
+        border: 1px solid gray;
+        border-left: none;
+        color: red;
+        border-radius: 0 3px 3px 0;
+        cursor: pointer;
+        background-color: lightgray;
+      }
+      div.cwl-container button:hover {
+        background-color: darkgray;
+      }
+      div.cwl-container button:active {
+        background-color: #999999;
+      }
       #title {
         margin-bottom: 0;
       }
       #customWL {
+        border: 1px solid gray;
+        border-right: none;
         width: 110px;
+        border-radius: 3px 0 0 3px;
+        padding: 0 5px;
+      }
+      #customWL:focus {
+        outline: none;
       }
     </style>
   </head>
@@ -88,10 +112,13 @@
           </tr>
           <tr>
             <td>
-              <label for="customWL">Custom word list</label>
+              <label for="customWL">Custom Words</label>
             </td>
             <td>
-              <input id="customWL" type="text" placeholder="JavaScript, React" />
+              <div class="cwl-container">
+                <input id="customWL" type="text" placeholder="JavaScript, React" />
+                <button id="clearWL">x</button>
+              </div>
             </td>
           </tr>
         </table>

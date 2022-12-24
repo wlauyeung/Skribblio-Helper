@@ -29,4 +29,10 @@
   enableOfficialWLNode.addEventListener('click', () => {
     chrome.storage.sync.set({ enableOfficialWL: enableOfficialWLNode.checked });
   });
+
+  document.getElementById('clearWL').addEventListener('click', ()=> {
+    const node = document.getElementById('customWL');
+    node.value = '';
+    node.dispatchEvent(new Event('change'));
+  });
 })();
