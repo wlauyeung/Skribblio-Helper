@@ -47,6 +47,13 @@ class Chat {
   submit() {
     this.#submitBtn.click();
   }
+
+  /**
+   * Returns the text in the chat.
+   */
+  text() {
+    return this.#fakeChat.value;
+  }
 }
 
 class Bot {
@@ -54,60 +61,85 @@ class Bot {
   #chat;
   /** @type {Element} */
   #suggContainer;
-  /** @type {Element} */
+  /** @type {Object[]} */
   #words;
+  /** @type {Object[]} */
+  #officialWords;
   /** @type {Element} */
   #inputForm;
-  /** @type {Element} */
-  #gameChat;
   /** @type {Element} */
   #currentWord
   /** @type {Boolean} */
   #indexMode;
+  /** @type {Boolean} */
+  #useOfficialWL;
   /** @type {Number} */
   #sortingMode;
   #currentSolutions = [];
+  /** @type {String[]} */
+  #submittedWords;
+  /** @type {String} */
+  #customWLString;
 
   /**
    * @param {Element} realChatNode 
    * @param {Element} fakeChatNode 
    * @param {Element} submitBtn 
    * @param {Element} inputForm 
-   * @param {Element} gameChat 
    */
-  constructor(realChatNode, fakeChatNode, submitBtn, inputForm, gameChat, currentWord) {
+  constructor(realChatNode, fakeChatNode, submitBtn, inputForm, currentWord) {
     this.#chat = new Chat(realChatNode, fakeChatNode, submitBtn);
     this.#inputForm = inputForm;
-    this.#gameChat = gameChat;
     this.#currentWord = currentWord;
-    this.#indexMode = true; 
+    this.#indexMode = true;
+    this.#useOfficialWL = true;
     this.#sortingMode = 3;
+    this.#words = {};
+    this.#officialWords = {};
+    this.#submittedWords = [];
+    this.#customWLString = '';
 
     const callback = (mutations_list, observer, b=this) => {
-      b.displaySolutions(b.findSolutions(b.getCurrentWord()));
+      const word = this.getCurrentWord();
+      let occurrences = 0;
+      for (let i = 0; i < word.length; i++) {
+        if (word.charAt(i) === '_') occurrences++;
+      }
+      if (occurrences === word.length) this.#submittedWords = [];
+      this.updateSolutions();
     };
     
     const observer = new MutationObserver(callback);
     this.#suggContainer = document.createElement('div');
     
-    fetch('https://www.wlay.me/static/json/words.json')
+    fetch('https://www.wlay.me/static/json/skribblio/words_v1.0.0.json')
     .then(res => res.json())
-    .then(data => this.#words = data)
+    .then(data => {
+      this.#officialWords = data;
+      chrome.storage.sync.get(["customWL"]).then((result) => {
+        this.#customWLString = result.customWL;
+        this.updateWordList();
+      });
+    })
     .catch(e => console.log(e));
 
     chrome.storage.onChanged.addListener((changes, namespace) => {
       for (const key of Object.keys(changes)) {
         if (key === 'indexMode') {
           this.changeIndexMode(changes[key].newValue);
+          this.displaySolutions();
         } else if (key === 'sortingMode') {
           const mode = parseInt(changes[key].newValue);
-          if (!isNaN(mode)) {
-            this.changeSortingMode(mode);
-            this.#currentSolutions = this.sortSolutions(this.#currentSolutions);
-          }
+          if (!isNaN(mode)) this.changeSortingMode(mode);
+          this.updateSolutions();
+        } else if (key === 'customWL') {
+          this.#customWLString = changes[key].newValue;
+          this.updateWordList();
+        } else if (key === 'enableOfficialWL') {
+          this.#useOfficialWL = changes[key].newValue;
+          this.updateWordList();
         }
       }
-      this.displaySolutions(this.#currentSolutions);
     });
   
     observer.observe(this.#currentWord, config);
@@ -119,21 +151,9 @@ class Bot {
     realChatNode.style.display = 'none';
     
     fakeChatNode.addEventListener('input', (e) => {
-      const guess = fakeChatNode.value.toLowerCase();
-      const possibilities = this.findSolutions(this.getCurrentWord());
-      const newPossibilities = [];
-    
+      const guess = fakeChatNode.value.toLowerCase();    
       if (!isNaN(parseInt(guess))) return;
-    
-      if (possibilities.length > 0) {
-        for (const possibility of possibilities) {
-          if (possibility.word.toLowerCase().includes(guess)) {
-            newPossibilities.push(possibility);
-          }
-        }
-      }
-    
-      this.displaySolutions(newPossibilities, false);
+      this.displaySolutions();
     });
     
     fakeChatNode.addEventListener('keypress', (e) => {
@@ -141,11 +161,9 @@ class Bot {
         const idx = parseInt(inputChatFake.value);
         if (this.#indexMode && !isNaN(idx) && idx >= 0 
           && idx <= this.#suggContainer.childNodes.length - 1) {
-          fakeChatNode.value = this.#suggContainer.childNodes[idx].getAttribute('word');
-          this.removeSolution(this.#suggContainer.childNodes[idx]);
+          fakeChatNode.value = this.#suggContainer.childNodes[idx].id.replace('submitBtn-', '');
         }
-        this.#chat.write(inputChatFake.value);
-        this.#chat.submit();
+        this.submit(inputChatFake.value);
       }
     });
     
@@ -154,7 +172,7 @@ class Bot {
         e.preventDefault();
         fakeChatNode.focus();
         this.#chat.clear();
-        this.displaySolutions(this.#currentSolutions);
+        this.displaySolutions();
       }
       if (e.code === 'Tab') {
         e.preventDefault();
@@ -170,10 +188,6 @@ class Bot {
       }
     });
     
-    this.#gameChat.addEventListener('submit', () => {
-      this.displaySolutions(this.#currentSolutions);
-    });
-
     chrome.storage.sync.get(["indexMode"]).then((result) => {
       this.changeIndexMode(result.indexMode);
     });
@@ -182,6 +196,9 @@ class Bot {
       if (!isNaN(mode)) {
         this.changeSortingMode(mode);
       }
+    });
+    chrome.storage.sync.get(["enableOfficialWL"]).then((result) => {
+      this.#useOfficialWL = result.enableOfficialWL;
     });
   }
   
@@ -207,16 +224,15 @@ class Bot {
    */
   findSolutions(clue) {
     const numWords = clue.split(' ').length;
-    const lens = clue.split(' ').map(word => word.length);
-    clue = clue.replaceAll(' ', '');
-      clue.replaceAll(' ', '').toLowerCase();
+    const lens = clue.split(/[\s-]/).map(word => word.length);
+    const text = this.#chat.text();
+    clue = clue.replaceAll(' ', '').replaceAll('-', '');
     if (this.#words[numWords] !== undefined && this.#words[numWords][clue.length] !== undefined) {
       let guesses = this.#words[numWords][clue.length];
       let letterPos = 0;
 
-      if (numWords > 1) {
-        guesses = guesses.filter(guess => guess.lens.every((e, i) => e === lens[i]));
-      }
+      guesses = guesses.filter(guess => guess.lens.every((e, i) => e === lens[i]));
+      guesses = guesses.filter(guess => !this.#submittedWords.includes(guess.word.toLowerCase()));
 
       while (clue.length !== 0) {
         let letter = '';
@@ -239,19 +255,16 @@ class Bot {
 
   /**
    * Displays the list of potential solutions under the chat bar.
-   * @param {String[]} solutions The list of potential solutions
-   * @param {Boolean} replace True if the new answers should replace
-   * all of the old ones
    */
-  displaySolutions(solutions, replace = true) {
+  displaySolutions() {
+    const text = this.#chat.text();
     let i = 0;
     this.#suggContainer.innerHTML = '';
-    for (const word of solutions) {
+    for (const word of this.#currentSolutions
+      .filter(g => g.word.toLowerCase().includes(text.toLowerCase()))) {
       const choice = document.createElement('div');
       const submit = () => {
-        this.#chat.write(word.word);
-        this.removeSolution(choice);
-        this.#chat.submit();
+        this.submit(word.word);
       };
       choice.innerHTML = word.word;
       choice.addEventListener('mousedown', submit);
@@ -260,7 +273,7 @@ class Bot {
       });
       choice.setAttribute('class', 'solution');
       choice.setAttribute('tabindex', '-1');
-      choice.setAttribute('word', word.word);
+      choice.setAttribute('id', `submitBtn-${word.word}`);
       choice.addEventListener('focus', (e) => {
         this.#chat.write(word.word);
       });
@@ -272,23 +285,24 @@ class Bot {
       this.#suggContainer.append(choice);
       i++;
     }
-    if (replace) {
-      this.#currentSolutions = solutions;
-    }
   }
 
   /**
    * Remove a possible solution from the suggestion list.
-   * @param {Element} solutionNode 
+   * @param {String} solution 
    */
-  removeSolution(solutionNode) {
-    const word = solutionNode.getAttribute('word');
+  removeSolution(solution) {
+    let word = '';
     for (let i = 0; i < this.#currentSolutions.length; i++) {
-      if (this.#currentSolutions[i].word === word) {
+      if (this.#currentSolutions[i].word.toLowerCase() === solution.toLowerCase()) {
+        word = this.#currentSolutions[i].word;
         this.#currentSolutions.splice(i, 1);
       }
     }
-    setTimeout(() => { solutionNode.remove(); }, 50);
+    setTimeout(() => { 
+      const btn = document.getElementById(`submitBtn-${word}`);
+      if (btn !== null) btn.remove();
+    }, 50);
   }
 
   /**
@@ -333,7 +347,64 @@ class Bot {
     }
     return solutions;
   }
+
+  /**
+   * Refreshes the list of solutions using the hint.
+   */
+  updateSolutions() {
+    this.#currentSolutions = this.findSolutions(this.getCurrentWord());
+    this.displaySolutions();
+  }
+
+  /**
+   * Convert a string consists of words delimited by the comma character(,)
+   * into an word searchable by the bot.
+   * @param {String} wordString e.g. JavaScript, React, Node.js
+   */
+  addWordList(wordString) {
+    if (wordString === '') return;
+    const words = wordString.split(/,\s*/);
+    for (let word of words) {
+      word = word.trim();
+      const letters = word.replaceAll(' ', '').replaceAll('-', '');
+      if (letters === '') continue;
+      const wordArray = word.split(' ');
+      const obj = {
+          word: word,
+          letters: letters,
+          lens: word.split(/[\s-]/).map(w => w.length),
+          picked: 10000000000, //Prioritize custom words over official words
+          difficulty: 1
+      };
+      if (this.#words[wordArray.length] === undefined) this.#words[wordArray.length] = {};
+      if (this.#words[wordArray.length][letters.length] === undefined) this.#words[wordArray.length][letters.length] = [];
+      if (this.#words[wordArray.length][letters.length].findIndex((e) => e.word === word) === -1) {
+        this.#words[wordArray.length][letters.length].push(obj);
+      }
+    }
+  }
+
+  /**
+   * Submits a word.
+   * @param {String} word 
+   */
+  submit(word) {
+    this.#chat.write(word);
+    this.#submittedWords.push(word.toLowerCase());
+    this.removeSolution(word);
+    this.#chat.submit();
+    this.displaySolutions();
+  }
+
+  /**
+   * Refreshes the word list with the current configuration.
+   */
+  updateWordList() {
+    this.#words = {};
+    if (this.#useOfficialWL) this.#words = structuredClone(this.#officialWords);
+    this.addWordList(this.#customWLString);
+    this.updateSolutions();
+  }
 }
 
-const bot = new Bot(inputChatReal, inputChatFake, submitBtn, inputForm,
-  gameChat, currentWord);
+const bot = new Bot(inputChatReal, inputChatFake, submitBtn, inputForm, currentWord);

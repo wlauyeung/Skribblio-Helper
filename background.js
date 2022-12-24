@@ -16,3 +16,15 @@ chrome.storage.sync.get('sortingMode', result => {
     chrome.storage.sync.set({ sortingMode: 0 });
   }
 });
+
+chrome.storage.sync.get('customWL', result => {
+  if (result.customWL === undefined) {
+    chrome.storage.sync.set({ customWL: '' });
+  }
+});
+
+chrome.storage.sync.get('enableOfficialWL', result => {
+  if (result.enableOfficialWL === undefined) {
+    chrome.storage.sync.set({ enableOfficialWL: true });
+  }
+});

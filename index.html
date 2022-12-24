@@ -41,6 +41,9 @@
       #title {
         margin-bottom: 0;
       }
+      #customWL {
+        width: 110px;
+      }
     </style>
   </head>
   <body>
@@ -56,7 +59,15 @@
         <table>
           <tr>
             <td>
-              <label for="indexMode">Submit with Number</label>
+              <label for="enableOfficialWL">Use official word list</label>
+            </td>
+            <td>
+              <input type="checkbox" id="enableOfficialWL">
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <label for="indexMode">Submit with number</label>
             </td>
             <td>
               <input type="checkbox" id="indexMode">
@@ -64,7 +75,7 @@
           </tr>
           <tr>
             <td>
-              <label for="sortingMode">Sorting Order</label>
+              <label for="sortingMode">Sorting order</label>
             </td>
             <td>
               <select id="sortingMode">
@@ -73,6 +84,14 @@
                 <option value="2">Difficulty</option>
                 <option value="3">Mixed</option>
               </select>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <label for="customWL">Custom word list</label>
+            </td>
+            <td>
+              <input id="customWL" type="text" placeholder="JavaScript, React" />
             </td>
           </tr>
         </table>
