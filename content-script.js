@@ -168,7 +168,8 @@ class Bot {
     });
     
     document.addEventListener('keydown', (e) => {
-      if (e.ctrlKey || e.metaKey) {
+      if ((e.ctrlKey && e.code === 'ControlLeft') ||
+        (e.metaKey && e.code === 'MetaLeft')) {
         e.preventDefault();
         fakeChatNode.focus();
         this.#chat.clear();
