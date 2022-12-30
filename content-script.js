@@ -99,7 +99,7 @@ class Bot {
     this.#submittedWords = [];
     this.#customWLString = '';
 
-    const callback = (mutations_list, observer, b=this) => {
+    const callback = () => {
       const word = this.getCurrentWord();
       let occurrences = 0;
       for (let i = 0; i < word.length; i++) {
@@ -194,9 +194,7 @@ class Bot {
     });
     chrome.storage.sync.get(["sortingMode"]).then((result) => {
       const mode = parseInt(result.sortingMode);
-      if (!isNaN(mode)) {
-        this.changeSortingMode(mode);
-      }
+      if (!isNaN(mode)) this.changeSortingMode(mode);
     });
     chrome.storage.sync.get(["enableOfficialWL"]).then((result) => {
       this.#useOfficialWL = result.enableOfficialWL;
@@ -206,7 +204,7 @@ class Bot {
   /**
    * Turns a DOM node that contains the hint into a string
    * that is interruptable by the program.
-   * @param {Node} node
+   * @param {Node} node The node containing the hint
    * @returns {String} A clue interruptable by findSolutions()
    */
   unwrapClue(node) {
@@ -220,7 +218,7 @@ class Bot {
 
   /**
    * Finds a list of pontential answers by filtering out wrong guesses with a clue.
-   * @param {String} clue 
+   * @param {String} clue The hint used to search for answers
    * @returns {String[]} A list of potential answers
    */
   findSolutions(clue) {
@@ -289,7 +287,7 @@ class Bot {
   }
 
   /**
-   * Remove a possible solution from the suggestion list.
+   * Removes a possible solution from the suggestion list.
    * @param {String} solution 
    */
   removeSolution(solution) {
@@ -307,7 +305,8 @@ class Bot {
   }
 
   /**
-   * @returns {String} A clue
+   * Extracts the hint from the website.
+   * @returns {String} The hint
    */
   getCurrentWord() {
     return this.unwrapClue(this.#currentWord);
