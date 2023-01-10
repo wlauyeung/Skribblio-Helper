@@ -5,6 +5,10 @@ const inputChatReal = inputForm.firstChild;
 const inputChatFake = inputChatReal.cloneNode(true);
 const submitBtn = document.createElement('button');
 const config = { attributes: true, childList: true, subtree: true };
+const language = document.querySelector('.container-name-lang > select');
+const languages = {
+  0: 'en', 1: 'de', 24: 'es', 7: 'fr'
+}
 
 class Chat {
   /** @type {Element} */
@@ -80,6 +84,8 @@ class Bot {
   #submittedWords;
   /** @type {String} */
   #customWLString;
+  /** @type {String} */
+  #language;
 
   /**
    * @param {Element} realChatNode 
@@ -98,6 +104,8 @@ class Bot {
     this.#officialWords = {};
     this.#submittedWords = [];
     this.#customWLString = '';
+    this.#language = languages[language.value] === undefined ? 'en' : languages[language.value];
+
 
     const callback = () => {
       const word = this.getCurrentWord();
@@ -112,7 +120,7 @@ class Bot {
     const observer = new MutationObserver(callback);
     this.#suggContainer = document.createElement('div');
     
-    fetch('https://www.wlay.me/static/json/skribblio/words_v1.0.0.json')
+    fetch(`https://www.wlay.me/static/json/skribblio/words_${this.#language}_v1.0.0.json`)
     .then(res => res.json())
     .then(data => {
       this.#officialWords = data;
@@ -188,6 +196,17 @@ class Bot {
         node.focus();
       }
     });
+
+    document.querySelector('.container-name-lang > select').addEventListener('change', (e) => {
+      this.#language = languages[language.value] === undefined ? 'en' : languages[language.value];
+      fetch(`https://www.wlay.me/static/json/skribblio/words_${this.#language}_v1.0.0.json`)
+      .then(res => res.json())
+      .then(data => {
+        this.#officialWords = data;
+        this.updateWordList();
+      })
+      .catch(e => console.log(e));
+    });
     
     chrome.storage.sync.get(["indexMode"]).then((result) => {
       this.changeIndexMode(result.indexMode);
@@ -224,7 +243,6 @@ class Bot {
   findSolutions(clue) {
     const numWords = clue.split(' ').length;
     const lens = clue.split(/[\s-]/).map(word => word.length);
-    const text = this.#chat.text();
     clue = clue.replaceAll(' ', '').replaceAll('-', '');
     if (this.#words[numWords] !== undefined && this.#words[numWords][clue.length] !== undefined) {
       let guesses = this.#words[numWords][clue.length];
