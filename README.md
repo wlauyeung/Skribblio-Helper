@@ -4,6 +4,7 @@
 Skribblio Helper is a chrome extension that provides potential answers automatically to its users. It interprets the hints given by skribbl.io and finds all possible answers among 3600+ words.
 
 ## Features
+- Support for English, German, Spanish and French
 - Click on the word to have it submitted
 - Submitted words will be removed from the word list
 - The word list will be updated automatically when more hints are given
