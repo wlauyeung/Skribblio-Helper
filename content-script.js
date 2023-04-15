@@ -1,7 +1,6 @@
 const currentWord = document.getElementById('game-word');
-const gameChat = document.getElementById('game-chat');
-const inputForm = gameChat.firstChild.childNodes[2];
-const inputChatReal = inputForm.firstChild;
+const inputForm = document.querySelector('#game-chat > .chat-container  > form');
+const inputChatReal = inputForm.querySelector('input');
 const inputChatFake = inputChatReal.cloneNode(true);
 const submitBtn = document.createElement('button');
 const config = { attributes: true, childList: true, subtree: true };
