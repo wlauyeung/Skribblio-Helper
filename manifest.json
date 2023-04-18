@@ -1,7 +1,7 @@
 {
   "name": "Skribbl.io Helper",
   "description": "Gives you potential answers on skribbl.io",
-  "version": "1.6.1",
+  "version": "1.6.2",
   "manifest_version": 3,
   "author": "Smartjacky",
   "background": {
@@ -28,7 +28,7 @@
     "storage"
   ],
   "host_permissions": [
-    "https://www.wlay.me/*"
+    "https://wlauyeung.github.io/Skribblio-Word-Bank/*"
   ],
   "icons": {
     "16": "images/icon16.png",

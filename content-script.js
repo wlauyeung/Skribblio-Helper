@@ -7,7 +7,8 @@ const config = { attributes: true, childList: true, subtree: true };
 const language = document.querySelector('.container-name-lang > select');
 const languages = {
   0: 'en', 1: 'de', 24: 'es', 7: 'fr'
-}
+};
+const wordBankURL = 'https://wlauyeung.github.io/Skribblio-Word-Bank/';
 
 class Chat {
   /** @type {Element} */
@@ -119,7 +120,7 @@ class Bot {
     const observer = new MutationObserver(callback);
     this.#suggContainer = document.createElement('div');
     
-    fetch(`https://www.wlay.me/static/json/skribblio/words_${this.#language}_v1.0.0.json`)
+    fetch(`${wordBankURL}words_${this.#language}_v1.0.0.json`)
     .then(res => res.json())
     .then(data => {
       this.#officialWords = data;
@@ -198,7 +199,7 @@ class Bot {
 
     document.querySelector('.container-name-lang > select').addEventListener('change', (e) => {
       this.#language = languages[language.value] === undefined ? 'en' : languages[language.value];
-      fetch(`https://www.wlay.me/static/json/skribblio/words_${this.#language}_v1.0.0.json`)
+      fetch(`${wordBankURL}words_${this.#language}_v1.0.0.json`)
       .then(res => res.json())
       .then(data => {
         this.#officialWords = data;
