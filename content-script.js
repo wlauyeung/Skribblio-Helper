@@ -8,7 +8,7 @@ const language = document.querySelector('.container-name-lang > select');
 const languages = {
   0: 'en', 1: 'de', 24: 'es', 7: 'fr'
 };
-const wordBankURL = 'https://wlauyeung.github.io/Skribblio-Word-Bank/';
+const wordBankURL = 'https://wlay.me/Skribblio-Word-Bank/';
 
 class Chat {
   /** @type {Element} */
@@ -65,6 +65,8 @@ class Bot {
   #chat;
   /** @type {Element} */
   #suggContainer;
+  /** @type {Element} */
+  #sizeAdjuster;
   /** @type {Object[]} */
   #words;
   /** @type {Object[]} */
@@ -86,6 +88,12 @@ class Bot {
   #customWLString;
   /** @type {String} */
   #language;
+  /** @type {Number} */
+  #suggSize;
+  /** @type {Number} */
+  #maxSuggSize;
+  /** @type {Number} */
+  #minSuggSize;
 
   /**
    * @param {Element} realChatNode 
@@ -105,9 +113,12 @@ class Bot {
     this.#submittedWords = [];
     this.#customWLString = '';
     this.#language = languages[language.value] === undefined ? 'en' : languages[language.value];
+    this.#suggSize = 0.9;
+    this.#maxSuggSize = 2;
+    this.#minSuggSize = 0.4;
 
 
-    const callback = () => {
+    const updateSuggestion = () => {
       const word = this.getCurrentWord();
       let occurrences = 0;
       for (let i = 0; i < word.length; i++) {
@@ -116,9 +127,16 @@ class Bot {
       if (occurrences === word.length) this.#submittedWords = [];
       this.updateSolutions();
     };
+
+    const scrollChat = () => {
+      const chat = document.querySelector('.chat-content');
+      chat.scrollTo(0, chat.scrollHeight);
+    }
     
-    const observer = new MutationObserver(callback);
+    const hintObserver = new MutationObserver(updateSuggestion);
+    const chatObserver = new MutationObserver(scrollChat);
     this.#suggContainer = document.createElement('div');
+    this.#sizeAdjuster = document.createElement('div');
     
     fetch(`${wordBankURL}words_${this.#language}_v1.0.0.json`)
     .then(res => res.json())
@@ -150,10 +168,28 @@ class Bot {
       }
     });
   
-    observer.observe(this.#currentWord, config);
+    hintObserver.observe(this.#currentWord, config);
+    chatObserver.observe(document.querySelector('.chat-content'), config);
     this.#suggContainer.setAttribute('class', 'suggestions');
+    this.#sizeAdjuster.setAttribute('class', 'size-adjuster');
     this.#inputForm.append(this.#suggContainer);
+    this.#inputForm.append(this.#sizeAdjuster);
     this.#inputForm.append(submitBtn);
+
+    const zoomInBtn = document.createElement('button');
+    const zoomOutBtn = document.createElement('button');
+    zoomInBtn.innerHTML = '+';
+    zoomInBtn.addEventListener('click', (ev) => {
+      this.#suggSize = Math.min(this.#maxSuggSize, this.#suggSize + 0.2);
+      this.displaySolutions();
+    });
+    zoomOutBtn.innerHTML = '-';
+    zoomOutBtn.addEventListener('click', (ev) => {
+      this.#suggSize = Math.max(this.#minSuggSize, this.#suggSize - 0.2);
+      this.displaySolutions();
+    });
+    this.#sizeAdjuster.append(zoomOutBtn);
+    this.#sizeAdjuster.append(zoomInBtn);
     
     realChatNode.after(inputChatFake);
     realChatNode.style.display = 'none';
@@ -294,6 +330,7 @@ class Bot {
       choice.addEventListener('focus', (e) => {
         this.#chat.write(word.word);
       });
+      choice.style.fontSize = `${this.#suggSize}rem`;
       if (this.#indexMode) {
         const index = document.createElement('span');
         index.innerHTML = i;
