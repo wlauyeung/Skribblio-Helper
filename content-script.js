@@ -173,7 +173,7 @@ class Bot {
     this.#suggContainer.setAttribute('class', 'suggestions');
     this.#sizeAdjuster.setAttribute('class', 'size-adjuster');
     this.#inputForm.append(this.#suggContainer);
-    this.#inputForm.append(this.#sizeAdjuster);
+    this.#inputForm.parentNode.append(this.#sizeAdjuster);
     this.#inputForm.append(submitBtn);
 
     const zoomInBtn = document.createElement('button');
