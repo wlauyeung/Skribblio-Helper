@@ -1,3 +1,7 @@
+#game-chat > .chat-form {
+  display: grid;
+}
+
 div.suggestions {
   background-color: #EEEEEE;
   margin-top: 5px;

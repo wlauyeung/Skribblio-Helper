@@ -1,5 +1,5 @@
 const currentWord = document.getElementById('game-word');
-const inputForm = document.querySelector('#game-chat > .chat-container  > form');
+const inputForm = document.querySelector('#game-chat > .chat-form');
 const inputChatReal = inputForm.querySelector('input');
 const inputChatFake = inputChatReal.cloneNode(true);
 const submitBtn = document.createElement('button');
