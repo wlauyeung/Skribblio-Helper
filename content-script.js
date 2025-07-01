@@ -212,24 +212,19 @@ class Bot {
     });
     
     document.addEventListener('keydown', (e) => {
-      if ((e.ctrlKey && e.code === 'ControlLeft') ||
-        (e.metaKey && e.code === 'MetaLeft')) {
+      if (e.code === 'Backspace' && e.shiftKey) {
         e.preventDefault();
         fakeChatNode.focus();
         this.#chat.clear();
         this.displaySolutions();
       }
-      if (e.code === 'Tab') {
+      if (e.code === 'Tab' && e.target.getAttribute('class') === 'solution' && e.target.nextSibling === null) {
         e.preventDefault();
-        const solutions = this.#suggContainer.childNodes;
-        let node = document.activeElement;
-        if (solutions.length === 0) return;
-        if (node.className !== 'solution' || node.nextSibling === null) {
-          node = solutions[0];
-        } else {
-          node = node.nextSibling;
-        }
-        node.focus();
+        this.#suggContainer.childNodes[0].focus();
+      }
+      if (e.code === 'Enter' && e.target !== fakeChatNode && e.target.getAttribute('class') !== 'solution') {
+        e.preventDefault();
+        fakeChatNode.focus();
       }
     });
 
@@ -325,7 +320,7 @@ class Bot {
         if (e.code === 'Enter') submit();
       });
       choice.setAttribute('class', 'solution');
-      choice.setAttribute('tabindex', '-1');
+      choice.setAttribute('tabindex', '0');
       choice.setAttribute('id', `submitBtn-${word.word}`);
       choice.addEventListener('focus', (e) => {
         this.#chat.write(word.word);
