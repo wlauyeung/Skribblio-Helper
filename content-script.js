@@ -6,7 +6,7 @@ const submitBtn = document.createElement('button');
 const config = { attributes: true, childList: true, subtree: true };
 const language = document.querySelector('.container-name-lang > select');
 const languages = {
-  0: 'en', 1: 'de', 24: 'es', 7: 'fr'
+  0: 'en', 1: 'de', 24: 'es', 7: 'fr', 14: 'kr'
 };
 const wordBankURL = 'https://wlay.me/Skribblio-Word-Bank/';
 
