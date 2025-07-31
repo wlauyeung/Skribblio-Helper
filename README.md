@@ -10,7 +10,7 @@ Skribblio Helper is a chrome extension that provides potential answers automatic
 - The word list will be updated automatically when more hints are given
 - Search function to further narrow down potential answers
 - Use the tab key to cycle through words then press the enter key to quickly submit
-- Pressing the control or the command key will return to chat and clears it
+- Pressing the shift and backspace key will return to chat and clears it
 - Change between 4 sorting orders (Alphabetical, Most Picked, Difficulty, Mixed)
 - Support for custom word lists and have the ability to disable the official word list
 
